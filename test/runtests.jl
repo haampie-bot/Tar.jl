@@ -722,9 +722,11 @@ end
         end
     end
 
-    # add a sketchy entry to tarball
-    open(tarball, append=true) do io
+    # add a sketchy entry to tarball, before the end-of-archive marker
+    open(tarball, "r+") do io
+        seek(io, filesize(io) - 1024)
         Tar.write_header(io, Tar.Header("/bad", :file, 0o644, 0, ""))
+        write(io, zeros(UInt8, 1024))
     end
     paths = push!(copy(test_dir_paths), "/bad")
 
