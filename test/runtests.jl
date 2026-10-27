@@ -209,6 +209,7 @@ end
     data = rand(UInt8, len)
     with_tarball(
         Tar.Header("file", :file, 0o644, len, ""), data, fill(0x0, pad),
+        zeros(UInt8, 1024),
     ) do tarball
         @testset "tarball is well-formed" begin
             @test Tar.list(tarball) == [Tar.Header("file", :file, 0o644, len, "")]
@@ -641,6 +642,7 @@ end
             tarball = Tar.create(dir)
             bytes = read(tarball)
             @test isfile(tarball)
+            @test bytes[end-1023:end] == zeros(UInt8, 1024)
             rm(tarball)
 
             # create(dir, tarball)
@@ -1214,6 +1216,7 @@ end
     # create reference tarball
     with_tarball(
         Tar.Header("file", :file, 0o755, len, ""), data, fill(0x0, pad),
+        zeros(UInt8, 1024),
     ) do reference
         hash = tree_hash(Tar.extract(reference))
         # create tarball with self-referential hard link
