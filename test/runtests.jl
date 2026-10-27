@@ -732,14 +732,26 @@ end
 
     # list([callback,] tarball; strict=true|false)
     arg_readers(tarball) do tar
-        @arg_test tar @test_throws ErrorException Tar.list(tar)
-        @arg_test tar @test_throws ErrorException Tar.list(tar, strict=true)
+        @arg_test tar begin
+            @test_throws ErrorException Tar.list(tar)
+            read(tar) # consume the rest
+        end
+        @arg_test tar begin
+            @test_throws ErrorException Tar.list(tar, strict=true)
+            read(tar) # consume the rest
+        end
         @arg_test tar begin
             headers = Tar.list(tar, strict=false)
             @test paths == [hdr.path for hdr in headers]
         end
-        @arg_test tar @test_throws ErrorException tar_count(tar)
-        @arg_test tar @test_throws ErrorException tar_count(tar, strict=true)
+        @arg_test tar begin
+            @test_throws ErrorException tar_count(tar)
+            read(tar) # consume the rest
+        end
+        @arg_test tar begin
+            @test_throws ErrorException tar_count(tar, strict=true)
+            read(tar) # consume the rest
+        end
         @arg_test tar @test n + 1 == tar_count(tar, strict=false)
     end
     rm(tarball)
